@@ -1,0 +1,41 @@
+name: Deploy to server
+
+# main branchga har bir push bo'lganda ishga tushadi
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Serverga SSH orqali ulanib deploy qilish
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            set -e
+            cd ${{ secrets.APP_DIR }}
+
+            echo "==> Kod yangilanmoqda"
+            git fetch --all
+            git reset --hard origin/main
+
+            echo "==> Bog'liqliklar (dependencies)"
+            npm ci
+
+            echo "==> Prisma client + migratsiya"
+            npx prisma generate
+            npx prisma migrate deploy
+
+            echo "==> Build"
+            npm run build
+
+            echo "==> PM2 restart"
+            pm2 restart ${{ secrets.PM2_NAME }} --update-env || pm2 start dist/main.js --name ${{ secrets.PM2_NAME }}
+            pm2 save
+
+            echo "==> Tayyor ✅"
