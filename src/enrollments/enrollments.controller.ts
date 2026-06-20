@@ -14,7 +14,7 @@ export class EnrollmentsController {
 
   // Kursga yozilish.
   @Post()
-  @ApiOperation({ summary: 'Joriy foydalanuvchini kursga yozish' })
+  @ApiOperation({ summary: 'Joriy foydalanuvchini kursga yozishsh' })
   enroll(
     @CurrentUser('id') userId: string,
     @Body() dto: CreateEnrollmentDto,
