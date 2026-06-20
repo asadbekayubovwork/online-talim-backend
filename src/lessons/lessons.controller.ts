@@ -27,11 +27,13 @@ export class LessonsController {
   // --- Ommaviy: ko'rish ---
 
   @Get('courses/:courseId/lessons')
+  @ApiOperation({ summary: "Kurs darslari ro'yxati" })
   findByCourse(@Param('courseId') courseId: string) {
     return this.lessonsService.findByCourse(courseId);
   }
 
   @Get('lessons/:id')
+  @ApiOperation({ summary: "Bitta dars ma'lumoti" })
   findOne(@Param('id') id: string) {
     return this.lessonsService.findOne(id);
   }
@@ -58,6 +60,7 @@ export class LessonsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiOperation({ summary: "Kursga dars (video) qo'shish (faqat ADMIN)" })
   create(
     @Param('courseId') courseId: string,
     @Body() dto: CreateLessonDto,
@@ -69,6 +72,7 @@ export class LessonsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiOperation({ summary: "Darsni tahrirlash (faqat ADMIN)" })
   update(@Param('id') id: string, @Body() dto: UpdateLessonDto) {
     return this.lessonsService.update(id, dto);
   }
@@ -77,6 +81,7 @@ export class LessonsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiOperation({ summary: "Darsni o'chirish (faqat ADMIN)" })
   remove(@Param('id') id: string) {
     return this.lessonsService.remove(id);
   }

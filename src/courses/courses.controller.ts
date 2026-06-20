@@ -8,7 +8,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -26,6 +26,7 @@ export class CoursesController {
   // --- Ommaviy endpointlar ---
 
   @Get()
+  @ApiOperation({ summary: "E'lon qilingan kurslar ro'yxati (ommaviy)" })
   findPublished() {
     return this.coursesService.findPublished();
   }
@@ -36,11 +37,15 @@ export class CoursesController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiOperation({
+    summary: "Barcha kurslar — qoralama + e'lon qilingan (faqat ADMIN)",
+  })
   findAllForAdmin() {
     return this.coursesService.findAllForAdmin();
   }
 
   @Get(':id')
+  @ApiOperation({ summary: "Bitta kurs ma'lumoti (darslari bilan)" })
   findOne(@Param('id') id: string) {
     return this.coursesService.findOne(id);
   }
@@ -51,6 +56,7 @@ export class CoursesController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiOperation({ summary: "Yangi kurs yaratish (faqat ADMIN)" })
   create(
     @CurrentUser('id') teacherId: string,
     @Body() dto: CreateCourseDto,
@@ -62,6 +68,7 @@ export class CoursesController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiOperation({ summary: "Kursni tahrirlash (faqat ADMIN)" })
   update(@Param('id') id: string, @Body() dto: UpdateCourseDto) {
     return this.coursesService.update(id, dto);
   }
@@ -70,6 +77,7 @@ export class CoursesController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiOperation({ summary: "Kursni o'chirish (faqat ADMIN)" })
   remove(@Param('id') id: string) {
     return this.coursesService.remove(id);
   }
