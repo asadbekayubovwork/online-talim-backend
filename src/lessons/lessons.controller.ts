@@ -8,12 +8,14 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { CreateLessonDto } from './dto/create-lesson.dto';
+import { SaveProgressDto } from './dto/save-progress.dto';
 import { UpdateLessonDto } from './dto/update-lesson.dto';
 import { LessonsService } from './lessons.service';
 
@@ -32,6 +34,22 @@ export class LessonsController {
   @Get('lessons/:id')
   findOne(@Param('id') id: string) {
     return this.lessonsService.findOne(id);
+  }
+
+  // --- Himoyalangan: o'quvchi progressini saqlash ---
+
+  @Post('lessons/:id/progress')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: "Dars progressini saqlash / darsni tugatildi deb belgilash",
+  })
+  saveProgress(
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+    @Body() dto: SaveProgressDto,
+  ) {
+    return this.lessonsService.saveProgress(userId, id, dto);
   }
 
   // --- Himoyalangan: faqat ADMIN dars/video qo'shadi ---

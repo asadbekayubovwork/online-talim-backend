@@ -171,6 +171,25 @@
         ]
       }
     },
+    "/api/courses/admin/list": {
+      "get": {
+        "operationId": "CoursesController_findAllForAdmin",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "courses"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/courses/{id}": {
       "get": {
         "operationId": "CoursesController_findOne",
@@ -248,6 +267,150 @@
         },
         "tags": [
           "courses"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/courses/{courseId}/lessons": {
+      "get": {
+        "operationId": "LessonsController_findByCourse",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "lessons"
+        ]
+      },
+      "post": {
+        "operationId": "LessonsController_create",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLessonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "lessons"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/lessons/{id}": {
+      "get": {
+        "operationId": "LessonsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "lessons"
+        ]
+      },
+      "patch": {
+        "operationId": "LessonsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLessonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "lessons"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "LessonsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "lessons"
         ],
         "security": [
           {
@@ -415,6 +578,10 @@
           "categoryId": {
             "type": "string",
             "description": "Kategoriya ID"
+          },
+          "teacherId": {
+            "type": "string",
+            "description": "O'qituvchi (User) ID. Berilmasa, kursni yaratgan admin biriktiriladi."
           }
         },
         "required": [
@@ -455,9 +622,82 @@
             "type": "string",
             "description": "Kategoriya ID"
           },
+          "teacherId": {
+            "type": "string",
+            "description": "O'qituvchi (User) ID. Berilmasa, kursni yaratgan admin biriktiriladi."
+          },
           "isPublished": {
             "type": "boolean",
             "description": "Kursni e'lon qilish"
+          }
+        }
+      },
+      "CreateLessonDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Kirish darsi"
+          },
+          "description": {
+            "type": "string",
+            "example": "Ushbu darsda kursning umumiy tuzilishi..."
+          },
+          "videoUrl": {
+            "type": "string",
+            "example": "https://www.youtube.com/watch?v=xxxx",
+            "description": "Video havolasi (URL)"
+          },
+          "duration": {
+            "type": "number",
+            "example": 600,
+            "description": "Davomiyligi (sekundlarda)"
+          },
+          "order": {
+            "type": "number",
+            "example": 1,
+            "description": "Darslar tartibi"
+          },
+          "isPreview": {
+            "type": "boolean",
+            "example": false,
+            "description": "Bepul ko'rish (ro'yxatdan o'tmaganlar uchun ham ochiq)"
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "UpdateLessonDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Kirish darsi"
+          },
+          "description": {
+            "type": "string",
+            "example": "Ushbu darsda kursning umumiy tuzilishi..."
+          },
+          "videoUrl": {
+            "type": "string",
+            "example": "https://www.youtube.com/watch?v=xxxx",
+            "description": "Video havolasi (URL)"
+          },
+          "duration": {
+            "type": "number",
+            "example": 600,
+            "description": "Davomiyligi (sekundlarda)"
+          },
+          "order": {
+            "type": "number",
+            "example": 1,
+            "description": "Darslar tartibi"
+          },
+          "isPreview": {
+            "type": "boolean",
+            "example": false,
+            "description": "Bepul ko'rish (ro'yxatdan o'tmaganlar uchun ham ochiq)"
           }
         }
       }

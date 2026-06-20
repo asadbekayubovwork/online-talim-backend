@@ -1,7 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Lesson } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateLessonDto } from './dto/create-lesson.dto';
+import { SaveProgressDto } from './dto/save-progress.dto';
 import { UpdateLessonDto } from './dto/update-lesson.dto';
 
 @Injectable()
@@ -64,6 +69,44 @@ export class LessonsService {
     await this.ensureLessonExists(id);
     await this.prisma.lesson.delete({ where: { id } });
     return { success: true };
+  }
+
+  // Dars progressini saqlash / darsni "tugatildi" deb belgilash.
+  // Faqat kursga yozilgan foydalanuvchi uchun ishlaydi.
+  async saveProgress(userId: string, lessonId: string, dto: SaveProgressDto) {
+    const lesson = await this.prisma.lesson.findUnique({
+      where: { id: lessonId },
+      select: { id: true, courseId: true },
+    });
+    if (!lesson) {
+      throw new NotFoundException('Dars topilmadi');
+    }
+
+    const enrollment = await this.prisma.enrollment.findUnique({
+      where: {
+        userId_courseId: { userId, courseId: lesson.courseId },
+      },
+      select: { id: true },
+    });
+    if (!enrollment) {
+      throw new ForbiddenException('Avval ushbu kursga yozilishingiz kerak');
+    }
+
+    return this.prisma.progress.upsert({
+      where: { userId_lessonId: { userId, lessonId } },
+      create: {
+        userId,
+        lessonId,
+        completed: dto.completed ?? false,
+        watchedSeconds: dto.watchedSeconds ?? 0,
+      },
+      update: {
+        ...(dto.completed !== undefined ? { completed: dto.completed } : {}),
+        ...(dto.watchedSeconds !== undefined
+          ? { watchedSeconds: dto.watchedSeconds }
+          : {}),
+      },
+    });
   }
 
   // --- yordamchilar ---
