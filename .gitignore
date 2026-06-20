@@ -5,10 +5,6 @@
 /dist
 *.tsbuildinfo
 
-# env
-.env
-.env.local
-
 # logs
 *.log
 npm-debug.log*
