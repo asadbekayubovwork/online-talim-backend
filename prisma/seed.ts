@@ -28,6 +28,25 @@ async function main() {
   console.log(
     `✅ Admin tayyor — login: "${admin.username}", parol: "${ADMIN_PASSWORD}"`,
   );
+
+  // Yo'nalishlar (kategoriyalar). Slug'lar frontend tarjima kalitlariga mos
+  // (coursesSection.categories.{fiqh|aqida|tazkiya}). upsert idempotent.
+  const categories = [
+    { name: "Hanafiy fiqhi va uning usuli darslari", slug: 'fiqh' },
+    { name: 'Aqida darslari', slug: 'aqida' },
+    { name: 'Tazkiya darslari', slug: 'tazkiya' },
+  ];
+
+  for (const category of categories) {
+    await prisma.category.upsert({
+      where: { slug: category.slug },
+      update: { name: category.name },
+      create: category,
+    });
+  }
+
+  // eslint-disable-next-line no-console
+  console.log(`✅ ${categories.length} ta kategoriya tayyor`);
 }
 
 main()
