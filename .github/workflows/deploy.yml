@@ -24,6 +24,11 @@ jobs:
             git fetch --all
             git reset --hard origin/main
 
+            echo "==> .env yozilmoqda (GitHub Secret'dan)"
+            cat > .env <<'ENVEOF'
+            ${{ secrets.ENV_FILE }}
+            ENVEOF
+
             echo "==> Bog'liqliklar (dependencies)"
             npm ci
 

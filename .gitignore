@@ -1,6 +1,11 @@
 # dependencies
 /node_modules
 
+# env (maxfiy — repoga qo'shilmaydi; .env.example namuna sifatida qoladi)
+.env
+.env.*
+!.env.example
+
 # build
 /dist
 *.tsbuildinfo
