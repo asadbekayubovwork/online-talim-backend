@@ -1,5 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
 
 @Injectable()
 export class CategoriesService {
@@ -32,5 +48,57 @@ export class CategoriesService {
       slug: c.slug,
       courseCount: countByCategory.get(c.id) ?? 0,
     }));
+  }
+
+  // Yangi kategoriya — faqat ADMIN. Slug nomdan avtomatik yaratiladi.
+  async create(dto: CreateCategoryDto) {
+    const name = dto.name.trim();
+    const slug = slugify(name) || `kategoriya-${Date.now().toString(36)}`;
+
+    const existing = await this.prisma.category.findFirst({
+      where: { OR: [{ name }, { slug }] },
+      select: { id: true },
+    });
+    if (existing) {
+      throw new ConflictException("Bunday yo'nalish allaqachon mavjud");
+    }
+
+    return this.prisma.category.create({ data: { name, slug } });
+  }
+
+  // Tahrirlash — nom yangilanadi (slug barqaror qoladi, tarjima mosligini buzmaslik uchun).
+  async update(id: string, dto: UpdateCategoryDto) {
+    await this.ensureExists(id);
+
+    if (dto.name !== undefined) {
+      const name = dto.name.trim();
+      const clash = await this.prisma.category.findFirst({
+        where: { name, NOT: { id } },
+        select: { id: true },
+      });
+      if (clash) {
+        throw new ConflictException("Bu nomli yo'nalish allaqachon mavjud");
+      }
+      return this.prisma.category.update({ where: { id }, data: { name } });
+    }
+
+    return this.prisma.category.findUnique({ where: { id } });
+  }
+
+  // O'chirish — kurslarning categoryId si NULL ga o'tadi (optional relation).
+  async remove(id: string) {
+    await this.ensureExists(id);
+    await this.prisma.category.delete({ where: { id } });
+    return { success: true };
+  }
+
+  private async ensureExists(id: string) {
+    const category = await this.prisma.category.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+    if (!category) {
+      throw new NotFoundException("Yo'nalish topilmadi");
+    }
   }
 }
